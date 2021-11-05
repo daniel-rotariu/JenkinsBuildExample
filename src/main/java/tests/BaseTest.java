@@ -6,10 +6,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -20,20 +25,49 @@ import com.google.common.io.Files;
 
 public class BaseTest {
    
-	public static WebDriver driver;
-	
-	//@Parameters({"url"})
-	@BeforeClass
-	public void setUp() {
-		System.setProperty("webdriver.chrome.driver", "Drivers/chromedriver.exe");	
-		driver =  new ChromeDriver();
-//		Log.info("Started the suite with Chrome browser");
-		driver.manage().window().maximize();
-		driver.manage().timeouts().implicitlyWait(10000, TimeUnit.MILLISECONDS);
-		driver.get("https://keybooks.ro/");	
-//		Log.info("Open the https://keybooks.ro/ ");
+	WebDriver driver;
+	String browser = System.getProperty("browser");
 
-		//driver.get(url);
+
+	@Parameters({"url"})
+	@BeforeClass
+	public void setup(String url) throws IOException {
+		//System.setProperty("webdriver.chrome.driver", "drivers/chromedriver");
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("start-maximized"); // open Browser in maximized mode
+		options.addArguments("--headless"); // applicable to windows os only
+		//driver = new ChromeDriver(options);
+		//driver.manage().window().maximize();
+	    FirefoxBinary firefoxBinary = new FirefoxBinary();
+	    firefoxBinary.addCommandLineOptions("--headless");
+	    FirefoxOptions firefoxOptions = new FirefoxOptions();
+	    firefoxOptions.setBinary(firefoxBinary);
+		
+		if(browser != "" & browser != null ) {
+			if(browser.equalsIgnoreCase("chrome")) {
+				driver = new ChromeDriver(options);
+				driver.manage().window().maximize();
+			}
+			else if(browser.equalsIgnoreCase("Firefox")) {
+				driver = new FirefoxDriver(firefoxOptions);
+				driver.manage().window().maximize();
+
+			}
+			
+		}
+		else {
+
+			driver = new ChromeDriver(options);
+			driver.manage().window().maximize();
+		}
+		
+		
+		
+		driver.manage().window().setSize(new Dimension(1440, 900));
+
+		driver.manage().timeouts().implicitlyWait(10000, TimeUnit.MILLISECONDS);	
+		driver.get(url);
+		
 	}
 		
 	@AfterClass
